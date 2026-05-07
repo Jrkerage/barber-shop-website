@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — Lifechanger Barbershop</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#C9A84C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Lifechanger">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E8C97A;
+    --gold-dark: #8B6914;
+    --dark: #0A0A0A;
+    --dark-2: #111111;
+    --dark-3: #1A1A1A;
+    --dark-4: #242424;
+    --text: #F5F0E8;
+    --text-muted: #8A8070;
+    --text-dim: #5A5040;
+    --border: rgba(201,168,76,0.2);
+    --border-strong: rgba(201,168,76,0.4);
+    --green: #27ae60;
+    --green-muted: rgba(39,174,96,0.12);
+    --green-border: rgba(39,174,96,0.3);
+    --red: #c0392b;
+    --red-muted: rgba(192,57,43,0.12);
+    --red-border: rgba(192,57,43,0.3);
+  }
+
+  html, body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 10% 0%, rgba(201,168,76,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 90% 100%, rgba(139,105,20,0.10) 0%, transparent 55%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* LAYOUT */
+  .layout {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    min-height: 100vh;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    background: var(--dark-2);
+    border-right: 0.5px solid var(--border);
+    padding: 2rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+
+  .sidebar-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dark));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 4px;
+  }
+
+  .sidebar-tag {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 2.5rem;
+  }
+
+  .nav-label {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 0.5rem;
+    padding: 0 0.5rem;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    margin-bottom: 2px;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+    text-decoration: none;
+  }
+
+  .nav-item:hover { background: var(--dark-3); color: var(--text); }
+
+  .nav-item.active {
+    background: rgba(201,168,76,0.1);
+    color: var(--gold);
+    border: 0.5px solid var(--border);
+  }
+
+  .nav-item svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .sidebar-bottom {
+    margin-top: auto;
+    padding-top: 1.5rem;
+    border-top: 0.5px solid var(--border);
+  }
+
+  .barber-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .barber-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold-dark));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--dark);
+    flex-shrink: 0;
+  }
+
+  .barber-name { font-size: 13px; font-weight: 500; }
+  .barber-role { font-size: 11px; color: var(--text-muted); }
+
+  /* MAIN */
+  .main {
+    padding: 2rem 2rem 4rem;
+    overflow-y: auto;
+  }
+
+  .main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+  }
+
+  .main-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .main-date {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .header-actions { display: flex; gap: 10px; }
+
+  .btn-outline {
+    padding: 9px 18px;
+    border: 0.5px solid var(--border);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .btn-outline:hover { border-color: var(--border-strong); color: var(--text); }
+
+  .btn-gold {
+    padding: 9px 18px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dark));
+    color: var(--dark);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  .btn-gold:hover { opacity: 0.9; }
+
+  /* STATS */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background: var(--dark-2);
+    border: 0.5px solid var(--border);
+    border-radius: 14px;
+    padding: 1.25rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1.5px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  .stat-label {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+
+  .stat-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-sub {
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  /* FILTER TABS */
+  .filter-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 1.25rem;
+  }
+
+  .tab {
+    padding: 7px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    border: 0.5px solid transparent;
+    background: transparent;
+    color: var(--text-muted);
+    transition: all 0.15s;
+  }
+
+  .tab:hover { background: var(--dark-3); color: var(--text); }
+
+  .tab.active {
+    background: rgba(201,168,76,0.1);
+    border-color: var(--border);
+    color: var(--gold);
+  }
+
+  /* APPOINTMENTS TABLE */
+  .table-wrap {
+    background: var(--dark-2);
+    border: 0.5px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+
+  .table-header {
+    display: grid;
+    grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr 80px;
+    padding: 12px 20px;
+    border-bottom: 0.5px solid var(--border);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .appt-row {
+    display: grid;
+    grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr 80px;
+    padding: 16px 20px;
+    border-bottom: 0.5px solid rgba(201,168,76,0.08);
+    align-items: center;
+    transition: background 0.15s;
+  }
+
+  .appt-row:last-child { border-bottom: none; }
+  .appt-row:hover { background: rgba(201,168,76,0.03); }
+
+  .appt-customer { display: flex; flex-direction: column; gap: 2px; }
+  .appt-name { font-size: 14px; font-weight: 500; }
+  .appt-email { font-size: 12px; color: var(--text-muted); }
+
+  .appt-datetime { display: flex; flex-direction: column; gap: 2px; }
+  .appt-date { font-size: 13px; }
+  .appt-time { font-size: 12px; color: var(--text-muted); }
+
+  .appt-service { font-size: 13px; }
+
+  .appt-deposit {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gold);
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+  }
+
+  .status-badge::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .status-confirmed {
+    background: var(--green-muted);
+    border: 0.5px solid var(--green-border);
+    color: #5dba7e;
+  }
+
+  .status-confirmed::before { background: var(--green); }
+
+  .status-cancelled {
+    background: var(--red-muted);
+    border: 0.5px solid var(--red-border);
+    color: #e07060;
+  }
+
+  .status-cancelled::before { background: var(--red); }
+
+  .status-completed {
+    background: rgba(201,168,76,0.1);
+    border: 0.5px solid var(--border);
+    color: var(--gold);
+  }
+
+  .status-completed::before { background: var(--gold); }
+
+  .row-actions { display: flex; gap: 6px; justify-content: flex-end; }
+
+  .row-btn {
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-family: inherit;
+    cursor: pointer;
+    border: 0.5px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    transition: all 0.15s;
+  }
+
+  .row-btn:hover { border-color: var(--border-strong); color: var(--text); }
+
+  .row-btn.danger:hover {
+    border-color: var(--red-border);
+    color: #e07060;
+    background: var(--red-muted);
+  }
+
+  /* TODAY SECTION */
+  .section-title {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+  }
+
+  .today-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 2rem;
+  }
+
+  .today-slot {
+    background: var(--dark-2);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .today-slot.booked {
+    border-color: var(--border-strong);
+    background: rgba(201,168,76,0.04);
+  }
+
+  .today-slot.booked::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1.5px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  .slot-time {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+
+  .slot-name {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 3px;
+  }
+
+  .slot-service {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .slot-empty {
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  /* DEPOSIT SUMMARY */
+  .deposit-summary {
+    background: var(--dark-2);
+    border: 0.5px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .deposit-summary::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1.5px;
+    background: linear-gradient(90deg, transparent, var(--gold), var(--gold-light), var(--gold), transparent);
+  }
+
+  .deposit-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    font-size: 14px;
+  }
+
+  .deposit-row + .deposit-row { border-top: 0.5px solid var(--border); }
+  .deposit-row .key { color: var(--text-muted); font-size: 13px; }
+  .deposit-row .val { font-weight: 500; }
+  .deposit-row .val.gold {
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .stats-grid { animation: fadeUp 0.5s ease 0.05s both; }
+  .table-wrap { animation: fadeUp 0.5s ease 0.1s both; }
+  .today-grid { animation: fadeUp 0.5s ease 0.15s both; }
+  .deposit-summary { animation: fadeUp 0.5s ease 0.2s both; }
+
+  /* MOBILE */
+  @media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .today-grid { grid-template-columns: repeat(2, 1fr); }
+    .table-header { display: none; }
+    .appt-row { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; gap: 6px; }
+    .main { padding: 1.5rem 1rem 3rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">Lifechanger</div>
+    <div class="sidebar-tag">Barber Dashboard</div>
+
+    <div class="nav-label">Menu</div>
+    <button class="nav-item active">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Overview
+    </button>
+    <button class="nav-item" onclick="filterTab('all')">
+      <svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+      All bookings
+    </button>
+    <button class="nav-item">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      Calendar
+    </button>
+    <button class="nav-item">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      Earnings
+    </button>
+
+    <div class="sidebar-bottom">
+      <div class="barber-info">
+        <div class="barber-avatar">LC</div>
+        <div>
+          <div class="barber-name">Lifechanger</div>
+          <div class="barber-role">Owner · Barber</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <div class="main-header">
+      <div>
+        <div class="main-title">Good morning ✦</div>
+        <div class="main-date" id="todayDate">Loading...</div>
+      </div>
+      <div class="header-actions">
+        <button class="btn-outline">Block time off</button>
+        <a href="booking.html" class="btn-gold" style="text-decoration:none;">+ New booking</a>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Today</div>
+        <div class="stat-value" id="statToday">4</div>
+        <div class="stat-sub">appointments</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">This week</div>
+        <div class="stat-value" id="statWeek">18</div>
+        <div class="stat-sub">bookings</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Deposits held</div>
+        <div class="stat-value" id="statDeposits">£35</div>
+        <div class="stat-sub">from no-shows</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">This month</div>
+        <div class="stat-value" id="statMonth">£480</div>
+        <div class="stat-sub">total earnings</div>
+      </div>
+    </div>
+
+    <!-- TODAY'S SCHEDULE -->
+    <div class="section-title">Today's schedule</div>
+    <div class="today-grid">
+      <div class="today-slot booked">
+        <div class="slot-time">9:00 AM</div>
+        <div class="slot-name">Marcus J.</div>
+        <div class="slot-service">Skin Fade</div>
+      </div>
+      <div class="today-slot booked">
+        <div class="slot-time">11:00 AM</div>
+        <div class="slot-name">Jamie T.</div>
+        <div class="slot-service">Beard & Haircut</div>
+      </div>
+      <div class="today-slot booked">
+        <div class="slot-time">1:00 PM</div>
+        <div class="slot-name">Ryan O.</div>
+        <div class="slot-service">Full Haircut</div>
+      </div>
+      <div class="today-slot booked">
+        <div class="slot-time">3:00 PM</div>
+        <div class="slot-name">Ethan B.</div>
+        <div class="slot-service">Kids Hair</div>
+      </div>
+      <div class="today-slot">
+        <div class="slot-time">5:00 PM</div>
+        <div class="slot-empty">Available</div>
+      </div>
+      <div class="today-slot">
+        <div class="slot-time">7:00 PM</div>
+        <div class="slot-empty">Available</div>
+      </div>
+    </div>
+
+    <!-- ALL APPOINTMENTS -->
+    <div class="section-title">All appointments</div>
+
+    <div class="filter-tabs">
+      <button class="tab active" onclick="filterTab('all', this)">All</button>
+      <button class="tab" onclick="filterTab('confirmed', this)">Confirmed</button>
+      <button class="tab" onclick="filterTab('completed', this)">Completed</button>
+      <button class="tab" onclick="filterTab('cancelled', this)">Cancelled</button>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-header">
+        <span>Customer</span>
+        <span>Date & time</span>
+        <span>Service</span>
+        <span>Deposit</span>
+        <span>Status</span>
+        <span></span>
+      </div>
+      <div id="appointmentsList"></div>
+    </div>
+
+    <!-- DEPOSIT SUMMARY -->
+    <div class="section-title">Deposit summary</div>
+    <div class="deposit-summary">
+      <div class="deposit-row">
+        <span class="key">Total deposits collected</span>
+        <span class="val gold">£45</span>
+      </div>
+      <div class="deposit-row">
+        <span class="key">Refunded (cancelled 24hrs+)</span>
+        <span class="val" style="color:#e08070;">−£10</span>
+      </div>
+      <div class="deposit-row">
+        <span class="key">Kept (no-shows / late cancels)</span>
+        <span class="val" style="color:#5dba7e;">+£35</span>
+      </div>
+      <div class="deposit-row">
+        <span class="key">Pending refunds</span>
+        <span class="val">£0</span>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  // Register service worker for PWA
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  }
+
+  // Set today's date
+  document.getElementById('todayDate').textContent = new Date().toLocaleDateString('en-GB', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  });
+
+  // ============================================================
+  // SUPABASE CONFIG
+  // ============================================================
+  const SUPABASE_URL = 'https://zuybsoaevhqtjffwpema.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1eWJzb2FldmhxdGpmZndwZW1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwOTAxOTcsImV4cCI6MjA5MzY2NjE5N30.38t6elBGsWfbi3RGg-B9BS2uHDgvwihBLZ07KXT-cEM';
+
+  let appointments = [];
+  let currentFilter = 'all';
+
+  // ============================================================
+  // FETCH BOOKINGS FROM SUPABASE
+  // ============================================================
+  async function fetchBookings() {
+    try {
+      const response = await fetch(SUPABASE_URL + '/rest/v1/bookings?select=*&order=appointment_date.asc,appointment_time.asc', {
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+        }
+      });
+      if (!response.ok) throw new Error('Failed to fetch bookings');
+      const data = await response.json();
+      appointments = data.map(b => ({
+        id: b.id,
+        name: b.customer_name || '',
+        email: b.email || '',
+        phone: b.phone || '',
+        date: formatDate(b.appointment_date),
+        rawDate: b.appointment_date,
+        time: b.appointment_time || '',
+        service: b.service || '',
+        deposit: '£5',
+        status: b.status || 'pending',
+        bookingRef: b.booking_ref || ''
+      }));
+      updateStats();
+      renderTodaySchedule();
+      renderAppointments();
+    } catch (err) {
+      console.error('Error loading bookings:', err);
+      document.getElementById('appointmentsList').innerHTML = '<div style="padding:2rem;text-align:center;color:var(--text-muted);font-size:14px;">Could not load bookings. Check your connection.</div>';
+    }
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    if (d.toDateString() === today.toDateString()) return 'Today';
+    if (d.toDateString() === tomorrow.toDateString()) return 'Tomorrow';
+    return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+  }
+
+  function isToday(dateStr) {
+    if (!dateStr) return false;
+    const d = new Date(dateStr);
+    const today = new Date();
+    return d.toDateString() === today.toDateString();
+  }
+
+  function isThisWeek(dateStr) {
+    if (!dateStr) return false;
+    const d = new Date(dateStr);
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const weekFromNow = new Date(today);
+    weekFromNow.setDate(weekFromNow.getDate() + 7);
+    return d >= today && d <= weekFromNow;
+  }
+
+  function isThisMonth(dateStr) {
+    if (!dateStr) return false;
+    const d = new Date(dateStr);
+    const today = new Date();
+    return d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
+  }
+
+  // ============================================================
+  // STATS
+  // ============================================================
+  function updateStats() {
+    const todayCount = appointments.filter(a => isToday(a.rawDate) && a.status !== 'cancelled').length;
+    const weekCount = appointments.filter(a => isThisWeek(a.rawDate) && a.status !== 'cancelled').length;
+    const cancelled = appointments.filter(a => a.status === 'cancelled').length;
+    const monthCount = appointments.filter(a => isThisMonth(a.rawDate) && a.status === 'completed').length;
+
+    document.getElementById('statToday').textContent = todayCount;
+    document.getElementById('statWeek').textContent = weekCount;
+    document.getElementById('statDeposits').textContent = '£' + (cancelled * 5);
+    document.getElementById('statMonth').textContent = '£' + (monthCount * 20);
+  }
+
+  // ============================================================
+  // TODAY'S SCHEDULE
+  // ============================================================
+  function renderTodaySchedule() {
+    const todayAppts = appointments.filter(a => isToday(a.rawDate) && a.status !== 'cancelled');
+    const grid = document.querySelector('.today-grid');
+    if (!grid) return;
+
+    if (todayAppts.length === 0) {
+      grid.innerHTML = '<div class="today-slot" style="grid-column:1/-1;text-align:center;"><div class="slot-empty">No bookings for today</div></div>';
+      return;
+    }
+
+    grid.innerHTML = todayAppts.map(a => `
+      <div class="today-slot booked">
+        <div class="slot-time">${a.time}</div>
+        <div class="slot-name">${a.name}</div>
+        <div class="slot-service">${a.service}</div>
+      </div>
+    `).join('');
+  }
+
+  // ============================================================
+  // FILTER & RENDER
+  // ============================================================
+  function filterTab(filter, el) {
+    currentFilter = filter;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    if (el) el.classList.add('active');
+    renderAppointments();
+  }
+
+  function renderAppointments() {
+    const list = document.getElementById('appointmentsList');
+    const filtered = currentFilter === 'all'
+      ? appointments
+      : appointments.filter(a => a.status === currentFilter || (currentFilter === 'confirmed' && a.status === 'pending'));
+
+    if (filtered.length === 0) {
+      list.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--text-muted);font-size:14px;">No appointments found.</div>';
+      return;
+    }
+
+    list.innerHTML = filtered.map((a) => `
+      <div class="appt-row">
+        <div class="appt-customer">
+          <div class="appt-name">${a.name}</div>
+          <div class="appt-email">${a.email}</div>
+        </div>
+        <div class="appt-datetime">
+          <div class="appt-date">${a.date}</div>
+          <div class="appt-time">${a.time}</div>
+        </div>
+        <div class="appt-service">${a.service}</div>
+        <div class="appt-deposit">${a.deposit}</div>
+        <div>
+          <span class="status-badge status-${a.status === 'pending' ? 'confirmed' : a.status}">${a.status}</span>
+        </div>
+        <div class="row-actions">
+          ${a.status === 'confirmed' || a.status === 'pending' ? `<button class="row-btn danger" onclick="cancelAppt(${a.id})">Cancel</button>` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ============================================================
+  // CANCEL APPOINTMENT (updates Supabase)
+  // ============================================================
+  async function cancelAppt(id) {
+    const appt = appointments.find(a => a.id === id);
+    if (!appt) return;
+    if (!confirm('Cancel booking for ' + appt.name + ' on ' + appt.date + ' at ' + appt.time + '?')) return;
+
+    try {
+      const response = await fetch(SUPABASE_URL + '/rest/v1/bookings?id=eq.' + id, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: 'cancelled' })
+      });
+      if (!response.ok) throw new Error('Failed to cancel');
+      // Refresh data
+      fetchBookings();
+    } catch (err) {
+      console.error(err);
+      alert('Could not cancel booking. Try again.');
+    }
+  }
+
+  // ============================================================
+  // INIT
+  // ============================================================
+  fetchBookings();
+  // Auto-refresh every 30 seconds so new bookings appear
+  setInterval(fetchBookings, 30000);
+</script>
+
+</body>
+</html>
