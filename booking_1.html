@@ -940,7 +940,35 @@
 
     try {
       await saveBookingToSupabase(data);
-      window.location.href = 'confirmation.html?ref=' + bookingRef + '&service=' + encodeURIComponent(data.service) + '&date=' + data.appointment_date + '&time=' + encodeURIComponent(data.appointment_time);
+
+      // Pick the right Stripe payment link based on choice
+      const paymentLinks = {
+        deposit: 'https://buy.stripe.com/test_28E28r6Hrc8AdV76efaR206',
+        'Kids Hair': 'https://buy.stripe.com/test_4gMfZhc1L5Kc18l323aR20c',
+        'Skin Fade': 'https://buy.stripe.com/test_dRm9ATc1L1tWcR31XZaR20d',
+        'Full Haircut': 'https://buy.stripe.com/test_5kQ3cv3vffkM5oB9qraR20f',
+        'Beard & Haircut': 'https://buy.stripe.com/test_14A4gz4zj4G83gt5abaR20g'
+      };
+
+      let stripeUrl;
+      if (data.payment_option === 'Pay £5 deposit (rest in shop)') {
+        stripeUrl = paymentLinks.deposit;
+      } else {
+        stripeUrl = paymentLinks[data.service];
+      }
+
+      if (!stripeUrl) {
+        alert('Could not find payment for this service. Please try again.');
+        this.textContent = 'Continue to payment →';
+        this.disabled = false;
+        return;
+      }
+
+      // Pass booking reference to Stripe via prefilled_email so we can track it back
+      // Add booking ref as query param to the redirect URL after payment
+      const fullStripeUrl = stripeUrl + '?prefilled_email=' + encodeURIComponent(data.email) + '&client_reference_id=' + bookingRef;
+      window.location.href = fullStripeUrl;
+
     } catch (err) {
       console.error(err);
       alert('Something went wrong saving your booking. Please try again.');
